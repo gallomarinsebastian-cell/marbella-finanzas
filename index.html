@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Marbella Finanzas</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:760px;margin:auto;padding-bottom:90px}
+.top{padding:20px 16px 12px;background:#fff;position:sticky;top:0;z-index:10;border-bottom:1px solid #e5e7eb}
+.brand{font-size:25px;font-weight:800}.sub{font-size:13px;color:#6b7280;margin-top:3px}
+.area-tabs{display:flex;gap:8px;margin-top:14px}.tab{flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;font-weight:600}.tab.active{background:#111827;color:#fff}
+.content{padding:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 2px 8px #00000008}
+.label{font-size:12px;color:#6b7280}.amount{font-size:21px;font-weight:800;margin-top:4px}.green{color:#16803c}.red{color:#c62828}.orange{color:#b45309}
+.section{margin-top:14px}.section h2{font-size:17px;margin:0 0 10px}.form{display:grid;gap:9px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+input,select{width:100%;border:1px solid #d1d5db;border-radius:11px;padding:11px;background:#fff;font:inherit}.primary{border:0;background:#111827;color:#fff;border-radius:11px;padding:12px;font-weight:700;width:100%}
+.secondary{border:1px solid #d1d5db;background:#fff;color:#111827;border-radius:11px;padding:11px;font-weight:600;width:100%}
+.danger{border:0;background:#fee2e2;color:#991b1b;border-radius:9px;padding:7px 9px}
+.list{display:grid;gap:8px}.item{display:flex;justify-content:space-between;gap:10px;background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:11px}.meta{font-size:12px;color:#6b7280;margin-top:3px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;padding:9px;z-index:20}.bottom-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.nav{border:0;background:#fff;color:#6b7280;padding:7px 3px;border-radius:10px;font-size:12px}.nav.active{background:#eef2ff;color:#111827;font-weight:700}
+.hidden{display:none}.empty{text-align:center;color:#6b7280;padding:18px}.pill{display:inline-block;padding:4px 7px;border-radius:8px;font-size:11px;background:#f3f4f6}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.quick button{padding:12px;border:1px solid #e5e7eb;background:#fff;border-radius:12px;text-align:left;font-weight:600}
+.note{font-size:12px;color:#6b7280;line-height:1.4}
+@media(max-width:430px){.row{grid-template-columns:1fr}.grid{gap:8px}.amount{font-size:19px}}
+@media print{
+ body{background:#fff!important}
+ .top,.bottom,.quick,.primary,.secondary,.danger,form{display:none!important}
+ .app{max-width:none;padding:0}
+ .content{padding:0}
+ .card{box-shadow:none;border:1px solid #ddd}
+ #business section.hidden,#personal{display:none!important}
+ #printArea{display:block!important}
+}
+#printArea{display:none}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<div class="brand">Marbella Finanzas</div>
+<div class="sub">Control diario de Mercadería Marbella</div>
+<div class="area-tabs">
+<button class="tab active" data-area="negocio">🏪 Negocio</button>
+<button class="tab" data-area="personal">👤 Personal</button>
+</div>
+</header>
+
+<div id="printArea"></div>
+<main class="content">
+<!-- NEGOCIO -->
+<div id="business">
+<section id="home">
+<div class="grid">
+<div class="card"><div class="label">Ventas sistema</div><div id="bSales" class="amount green">$0</div></div>
+<div class="card"><div class="label">Ventas a crédito</div><div id="bCreditSales" class="amount orange">$0</div></div>
+<div class="card"><div class="label">Ventas cobradas</div><div id="bCollected" class="amount green">$0</div></div>
+<div class="card"><div class="label">Gastos de caja</div><div id="bCashExpenses" class="amount red">$0</div></div>
+<div class="card"><div class="label">Diferencia ventas</div><div id="bSalesDifference" class="amount">$0</div></div>
+</div>
+
+<div class="section card">
+<h2>💵 Efectivo que debe haber</h2>
+<div id="expectedCash" class="amount green" style="font-size:30px">$0</div>
+<p class="note">Ventas sistema − ventas a crédito − gastos de caja − salidas de efectivo.</p>
+<div class="grid">
+<div><div class="label">Ventas sistema</div><div id="cashSalesDetail" class="amount">$0</div></div>
+<div><div class="label">− Crédito</div><div id="cashCreditDetail" class="amount orange">$0</div></div>
+<div><div class="label">− Gastos caja</div><div id="cashExpenseDetail" class="amount red">$0</div></div>
+<div><div class="label">− Salidas efectivo</div><div id="cashOutDetail" class="amount red">$0</div></div>
+</div>
+<button class="primary" onclick="go('close')">Hacer cierre diario</button>
+<button class="secondary" style="margin-top:8px" onclick="printClose()">🖨️ Imprimir cierre</button>
+</div>
+
+<div class="section card">
+<h2>Registrar rápidamente</h2>
+<div class="quick">
+<button onclick="quick('sale')">🛒 Venta</button>
+<button onclick="quick('expense')">💸 Gasto de caja</button>
+<button onclick="quick('transfer')">🔄 Transferencia</button>
+<button onclick="quick('credit')">📝 Venta a crédito</button>
+<button onclick="quick('order')">📦 Pedido</button>
+</div>
+</div>
+</section>
+
+<section id="orders" class="hidden">
+<div class="card"><h2>📦 Pedidos</h2>
+<form id="orderForm" class="form">
+<div class="row"><input id="orderSupplier" placeholder="Proveedor" required><input id="orderValue" type="number" min="0" placeholder="Valor" required></div>
+<div class="row"><input id="orderDate" type="date" required><select id="orderStatus"><option>Pendiente</option><option>Recibido</option><option>Pagado</option></select></div>
+<button class="primary">Guardar pedido</button>
+</form></div>
+<div id="ordersList" class="list section"></div>
+</section>
+
+<section id="cash" class="hidden">
+<div class="card"><h2>💵 Gastos de caja</h2>
+<p class="note">Todo gasto registrado aquí se descuenta automáticamente del efectivo que debe haber en caja.</p>
+<form id="expenseForm" class="form">
+<div class="row"><input id="expenseValue" type="number" min="0" placeholder="Valor" required><input id="expenseDesc" maxlength="80" placeholder="Concepto" required></div>
+<div class="row"><select id="expenseCat"><option>Compra menor</option><option>Domicilio</option><option>Transporte</option><option>Servicios</option><option>Mantenimiento</option><option>Otro</option></select><input id="expenseDate" type="date" required></div>
+<button class="primary">Registrar gasto</button>
+</form></div>
+<div id="expensesList" class="list section"></div>
+</section>
+
+<section id="transfers" class="hidden">
+<div class="card"><h2>🔄 Transferencias</h2>
+<form id="transferForm" class="form">
+<div class="row"><select id="transferType"><option value="entrada">Recibida</option><option value="salida">Realizada</option></select><input id="transferValue" type="number" min="0" placeholder="Valor" required></div>
+<div class="row"><input id="transferDesc" maxlength="80" placeholder="Concepto" required><input id="transferDate" type="date" required></div>
+<button class="primary">Registrar transferencia</button>
+</form></div>
+<div id="transfersList" class="list section"></div>
+</section>
+
+<section id="credit" class="hidden">
+<div class="card"><h2>📝 Ventas a crédito</h2>
+<form id="creditForm" class="form">
+<div class="row"><input id="creditClient" placeholder="Cliente" required><input id="creditValue" type="number" min="0" placeholder="Valor" required></div>
+<div class="row"><input id="creditDate" type="date" required><input id="creditDesc" maxlength="80" placeholder="Descripción"></div>
+<button class="primary">Registrar crédito</button>
+</form></div>
+<div id="creditList" class="list section"></div>
+</section>
+
+<section id="sales" class="hidden">
+<div class="card"><h2>🛒 Ventas total sistema</h2>
+<form id="salesForm" class="form">
+<div class="row"><input id="salesValue" type="number" min="0" placeholder="Venta total del sistema" required><input id="salesDate" type="date" required></div>
+<div class="row"><input id="salesCash" type="number" min="0" placeholder="Parte en efectivo" required><input id="salesTransfer" type="number" min="0" placeholder="Parte por transferencia" required></div>
+<div class="row"><input id="salesCredit" type="number" min="0" placeholder="Parte a crédito" required><input id="salesNote" maxlength="80" placeholder="Nota"></div>
+<button class="primary">Guardar venta del sistema</button>
+</form>
+<p class="note">Las tres formas de pago deben explicar la venta total: efectivo + transferencias + crédito.</p>
+</div>
+<div id="salesList" class="list section"></div>
+</section>
+
+<section id="close" class="hidden">
+<div class="card"><h2>📊 Cierre diario</h2>
+<form id="closeForm" class="form">
+<div class="row"><input id="closeDate" type="date" required><input id="realCash" type="number" min="0" placeholder="Efectivo real en caja" required></div>
+<button class="primary">Guardar cierre</button>
+</form>
+</div>
+<div id="closeResult" class="section"></div>
+<div id="closeList" class="list section"></div>
+</section>
+
+<section id="reports" class="hidden">
+<div class="card"><h2>📈 Reportes</h2><div id="report"></div>
+<button class="primary" style="margin-top:12px" onclick="printReport()">📄 Imprimir reporte completo</button>
+</div>
+</section>
+</div>
+
+<!-- PERSONAL -->
+<div id="personal" class="hidden">
+<section id="personalHome">
+<div class="grid">
+<div class="card"><div class="label">Ingresos</div><div id="pIncome" class="amount green">$0</div></div>
+<div class="card"><div class="label">Gastos</div><div id="pExpense" class="amount red">$0</div></div>
+<div class="card"><div class="label">Balance</div><div id="pBalance" class="amount">$0</div></div>
+<div class="card"><div class="label">Movimientos</div><div id="pCount" class="amount">0</div></div>
+</div>
+<div class="section card"><h2>Registrar movimiento personal</h2>
+<form id="personalForm" class="form">
+<div class="row"><select id="pType"><option value="gasto">Gasto</option><option value="ingreso">Ingreso</option></select><input id="pAmount" type="number" min="0" placeholder="Valor" required></div>
+<div class="row"><select id="pCat"><option>Vivienda</option><option>Alimentación</option><option>Transporte</option><option>Salud</option><option>Educación</option><option>Deudas</option><option>Compras</option><option>Entretenimiento</option><option>Ahorro</option><option>Otros</option></select><input id="pDesc" placeholder="Descripción" required></div>
+<input id="pDate" type="date" required>
+<button class="primary">Guardar movimiento</button>
+</form></div>
+<div id="personalList" class="list section"></div>
+</section>
+</div>
+</main>
+</div>
+
+<nav class="bottom">
+<div class="bottom-inner" id="businessNav">
+<button class="nav active" data-page="home">📊 Inicio</button>
+<button class="nav" data-page="orders">📦 Pedidos</button>
+<button class="nav" data-page="cash">💵 Caja</button>
+<button class="nav" data-page="more">☰ Más</button>
+</div>
+<div class="bottom-inner hidden" id="moreNav">
+<button class="nav" data-page="home">🏠 Inicio</button>
+<button class="nav" data-page="transfers">🔄 Transfer.</button>
+<button class="nav" data-page="credit">📝 Crédito</button>
+<button class="nav" data-page="sales">🛒 Ventas</button>
+<button class="nav" data-page="close">📊 Cierre</button>
+</div>
+</nav>
+
+<script>
+const KEY="marbella-finanzas-v2";
+const oldKey="marbella-finanzas-v1";
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||{
+ orders:[],expenses:[],transfers:[],credits:[],sales:[],closes:[],personal:[]
+};
+if(!localStorage.getItem(KEY)){
+ const old=JSON.parse(localStorage.getItem(oldKey)||'{"negocio":[],"personal":[]}');
+ state.personal=old.personal||[];
+ localStorage.setItem(KEY,JSON.stringify(state));
+}
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(n)||0);
+const today=()=>new Date().toISOString().slice(0,10);
+["orderDate","expenseDate","transferDate","creditDate","salesDate","closeDate","pDate"].forEach(id=>$(id).value=today());
+
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function sum(arr,key="value"){return arr.reduce((s,x)=>s+Number(x[key]||0),0)}
+function esc(s){return String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
+
+function go(page){
+ document.querySelectorAll("#business section").forEach(s=>s.classList.add("hidden"));
+ $(page).classList.remove("hidden");
+ document.querySelectorAll("#businessNav .nav,#moreNav .nav").forEach(b=>b.classList.remove("active"));
+ const btn=document.querySelector(`[data-page="${page}"]`);
+ if(btn)btn.classList.add("active");
+ if(page==="home"){
+   $("moreNav").classList.add("hidden");
+   $("businessNav").classList.remove("hidden");
+   document.querySelectorAll("#businessNav .nav").forEach(b=>b.classList.remove("active"));
+   document.querySelector('#businessNav [data-page="home"]').classList.add("active");
+ }
+ renderAll();
+}
+
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+ const area=b.dataset.area;
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x==b));
+ $("business").classList.toggle("hidden",area!=="negocio");
+ $("personal").classList.toggle("hidden",area!=="personal");
+ if(area==="personal")renderPersonal();
+});
+
+document.querySelectorAll("#businessNav .nav").forEach(b=>b.onclick=()=>{
+ if(b.dataset.page==="more"){
+   $("businessNav").classList.add("hidden");$("moreNav").classList.remove("hidden");return;
+ }
+ go(b.dataset.page);
+});
+document.querySelectorAll("#moreNav .nav").forEach(b=>b.onclick=()=>go(b.dataset.page));
+
+function quick(type){
+ const map={sale:"sales",expense:"cash",transfer:"transfers",credit:"credit",order:"orders"};
+ go(map[type]);
+}
+
+function renderHome(){
+ const sales=sum(state.sales);
+ const expenses=sum(state.expenses);
+ const creditSales=sum(state.sales,"credit");
+ const collected=sales-creditSales;
+ const cashOut=sum(state.transfers.filter(x=>x.type==="salida"));
+ const expected=sales-creditSales-expenses-cashOut;
+
+ $("bSales").textContent=money(sales);
+ $("bCreditSales").textContent=money(creditSales);
+ $("bCollected").textContent=money(collected);
+ $("bCashExpenses").textContent=money(expenses);
+
+ $("expectedCash").textContent=money(expected);
+ $("cashSalesDetail").textContent=money(sales);
+ $("cashCreditDetail").textContent=money(creditSales);
+ $("cashExpenseDetail").textContent=money(expenses);
+ $("cashOutDetail").textContent=money(cashOut);
+}
+
+function renderOrders(){
+ $("ordersList").innerHTML=state.orders.length?[...state.orders].reverse().map(x=>`
+ <div class="item"><div><b>${esc(x.supplier)}</b><div class="meta">${x.date} · ${money(x.value)}</div></div>
+ <div><span class="pill">${esc(x.status)}</span><button class="danger" onclick="removeItem('orders','${x.id}')">Eliminar</button></div></div>`).join(""):'<div class="empty">No hay pedidos.</div>';
+}
+function renderExpenses(){
+ $("expensesList").innerHTML=state.expenses.length?[...state.expenses].reverse().map(x=>`
+ <div class="item"><div><b>${esc(x.desc)}</b><div class="meta">${esc(x.cat)} · ${x.date}</div></div><div class="red"><b>-${money(x.value)}</b><br><button class="danger" onclick="removeItem('expenses','${x.id}')">Eliminar</button></div></div>`).join(""):'<div class="empty">No hay gastos de caja.</div>';
+}
+function renderTransfers(){
+ $("transfersList").innerHTML=state.transfers.length?[...state.transfers].reverse().map(x=>`
+ <div class="item"><div><b>${esc(x.desc)}</b><div class="meta">${x.date}</div></div><div class="${x.type==="entrada"?"green":"red"}"><b>${x.type==="entrada"?"+":"-"}${money(x.value)}</b><br><button class="danger" onclick="removeItem('transfers','${x.id}')">Eliminar</button></div></div>`).join(""):'<div class="empty">No hay transferencias.</div>';
+}
+function renderCredits(){
+ $("creditList").innerHTML=state.credits.length?[...state.credits].reverse().map(x=>{
+ const bal=Number(x.value)-Number(x.paid||0);
+ return `<div class="item"><div><b>${esc(x.client)}</b><div class="meta">${x.date} · ${esc(x.desc||"Venta a crédito")}</div></div><div class="orange"><b>${money(bal)}</b><br><button class="secondary" style="padding:6px" onclick="abono('${x.id}')">Abonar</button> <button class="danger" onclick="removeItem('credits','${x.id}')">Eliminar</button></div></div>`;
+ }).join(""):'<div class="empty">No hay ventas a crédito.</div>';
+}
+function renderSales(){
+ $("salesList").innerHTML=state.sales.length?[...state.sales].reverse().map(x=>`
+ <div class="item"><div><b>${x.date}</b><div class="meta">Efectivo ${money(x.cash)} · Transfer. ${money(x.transfer)} · Crédito ${money(x.credit)}${Math.abs(Number(x.paymentDifference||0))>0?` · <span class="${Number(x.paymentDifference)<0?"red":"orange"}">Diferencia ${money(x.paymentDifference)}</span>`:""}</div></div><div class="green"><b>${money(x.value)}</b><br><button class="danger" onclick="removeItem('sales','${x.id}')">Eliminar</button></div></div>`).join(""):'<div class="empty">No hay ventas registradas.</div>';
+}
+function renderCloses(){
+  $("closeList").innerHTML=state.closes.length?[...state.closes].reverse().map(x=>{
+    const diff=Number(x.real)-Number(x.expected);
+    return `<div class="item"><div><b>${x.date}</b><div class="meta">Esperado ${money(x.expected)} · Real ${money(x.real)}</div></div><div class="${diff===0?"green":diff>0?"orange":"red"}"><b>${diff>=0?"+":""}${money(diff)}</b><br><button class="danger" onclick="removeClose('${x.id}')">Eliminar</button></div></div>`;
+  }).join(""):'<div class="empty">No hay cierres guardados.</div>';
+}
+function renderClosePreview(){
+ const d=$("closeDate").value||today();
+ const s=state.sales.filter(x=>x.date===d);
+ const e=state.expenses.filter(x=>x.date===d);
+ const t=state.transfers.filter(x=>x.date===d&&x.type==="salida");
+ const systemSales=sum(s);
+ const creditSales=sum(s,"credit");
+ const cashOut=sum(t);
+ const cashExpenses=sum(e);
+ const expected=systemSales-creditSales-cashExpenses-cashOut;
+ $("closeResult").innerHTML=`<div class="card">
+ <h2>💵 Efectivo que debe haber</h2>
+ <div class="amount green" style="font-size:30px">${money(expected)}</div>
+ <div class="grid" style="margin-top:12px">
+ <div><div class="label">Ventas sistema</div><div class="amount">${money(systemSales)}</div></div>
+ <div><div class="label">− Ventas crédito</div><div class="amount orange">${money(creditSales)}</div></div>
+ <div><div class="label">− Gastos caja</div><div class="amount red">${money(cashExpenses)}</div></div>
+ <div><div class="label">− Salidas efectivo</div><div class="amount red">${money(cashOut)}</div></div>
+ </div></div>`;
+}
+function renderReport(){
+ const sales=sum(state.sales),orders=sum(state.orders),expenses=sum(state.expenses),credit=sum(state.credits.map(x=>Number(x.value)-Number(x.paid||0)));
+ $("report").innerHTML=`<div class="grid">
+ <div><div class="label">Ventas sistema</div><div class="amount green">${money(sales)}</div></div>
+ <div><div class="label">Pedidos</div><div class="amount">${money(orders)}</div></div>
+ <div><div class="label">Gastos caja</div><div class="amount red">${money(expenses)}</div></div>
+ <div><div class="label">Crédito pendiente</div><div class="amount orange">${money(credit)}</div></div>
+ </div>
+ <p class="note">Esta primera versión se concentra en control de caja y ventas. El inventario queda fuera por ahora.</p>`;
+}
+function renderAll(){renderHome();renderOrders();renderExpenses();renderTransfers();renderCredits();renderSales();renderClosePreview();renderCloses();renderReport()}
+
+function add(arr,obj){obj.id=Date.now().toString(36)+Math.random().toString(36).slice(2);arr.push(obj);save();renderAll()}
+window.removeItem=(name,id)=>{state[name]=state[name].filter(x=>x.id!==id);save();renderAll()}
+window.removeClose=id=>{
+  if(!confirm("¿Eliminar este cierre diario? Esta acción no se puede deshacer."))return;
+  state.closes=state.closes.filter(x=>x.id!==id);
+  save();
+  renderCloses();
+  renderClosePreview();
+}
+window.abono=id=>{
+ const x=state.credits.find(x=>x.id===id);if(!x)return;
+ const amount=Number(prompt(`Saldo actual: ${money(Number(x.value)-Number(x.paid||0))}\n¿Cuánto abono recibió?`));
+ if(!amount||amount<=0)return;
+ x.paid=Math.min(Number(x.value),Number(x.paid||0)+amount);save();renderCredits();renderHome();
+}
+
+$("orderForm").onsubmit=e=>{e.preventDefault();add(state.orders,{supplier:$("orderSupplier").value,value:Number($("orderValue").value),date:$("orderDate").value,status:$("orderStatus").value});e.target.reset();$("orderDate").value=today()}
+$("expenseForm").onsubmit=e=>{e.preventDefault();add(state.expenses,{value:Number($("expenseValue").value),desc:$("expenseDesc").value.trim(),cat:$("expenseCat").value,date:$("expenseDate").value});e.target.reset();$("expenseDate").value=today()}
+$("transferForm").onsubmit=e=>{e.preventDefault();add(state.transfers,{type:$("transferType").value,value:Number($("transferValue").value),desc:$("transferDesc").value.trim(),date:$("transferDate").value});e.target.reset();$("transferDate").value=today()}
+$("creditForm").onsubmit=e=>{e.preventDefault();add(state.credits,{client:$("creditClient").value.trim(),value:Number($("creditValue").value),paid:0,date:$("creditDate").value,desc:$("creditDesc").value.trim()});e.target.reset();$("creditDate").value=today()}
+$("salesForm").onsubmit=e=>{
+  e.preventDefault();
+  const value=Number($("salesValue").value)||0;
+  const cash=Number($("salesCash").value)||0;
+  const transfer=Number($("salesTransfer").value)||0;
+  const credit=Number($("salesCredit").value)||0;
+  const paymentDifference=(cash+transfer+credit)-value;
+
+  add(state.sales,{value,cash,transfer,credit,paymentDifference,date:$("salesDate").value,note:$("salesNote").value.trim()});
+
+  if(Math.abs(paymentDifference)>0){
+    alert(`Venta registrada. Diferencia: ${money(paymentDifference)}\n${paymentDifference<0?"Faltan":"Sobran"} ${money(Math.abs(paymentDifference))}.`);
+  }else{
+    alert("Venta registrada. Cuadra exactamente.");
+  }
+
+  e.target.reset();
+  $("salesDate").value=today();
+}
+$("closeDate").onchange=renderClosePreview;
+$("closeForm").onsubmit=e=>{
+  e.preventDefault();
+  const d=$("closeDate").value||today();
+  const s=state.sales.filter(x=>x.date===d);
+  const ex=state.expenses.filter(x=>x.date===d);
+  const tr=state.transfers.filter(x=>x.date===d&&x.type==="salida");
+
+  const expected=sum(s,"cash")-sum(ex)-sum(tr);
+  const real=Number($("realCash").value)||0;
+  const difference=real-expected;
+
+  add(state.closes,{date:d,expected,real,difference});
+
+  $("closeResult").innerHTML=`<div class="card">
+    <h2>📊 Resultado del cierre</h2>
+    <div class="label">Efectivo que debe haber</div>
+    <div class="amount green" style="font-size:30px">${money(expected)}</div>
+    <div class="label" style="margin-top:12px">Efectivo contado</div>
+    <div class="amount">${money(real)}</div>
+    <div class="label" style="margin-top:12px">Diferencia</div>
+    <div class="amount ${difference===0?"green":difference<0?"red":"orange"}">${money(difference)}</div>
+    <p class="note">${difference===0?"La caja cuadra exactamente.":difference<0?"Falta efectivo en caja.":"Hay efectivo de más en caja."}</p>
+  </div>`;
+
+  alert(`Cierre guardado. Diferencia: ${money(difference)}.`);
+  e.target.reset();
+  $("closeDate").value=d;
+  renderClosePreview();
+}
+
+
+function printClose(){
+  let d=$("closeDate").value||today();
+  const savedForDate=state.closes.filter(x=>x.date===d);
+  if(!savedForDate.length && state.closes.length){
+    d=state.closes[state.closes.length-1].date;
+  }
+  const s=state.sales.filter(x=>x.date===d);
+  const e=state.expenses.filter(x=>x.date===d);
+  const t=state.transfers.filter(x=>x.date===d&&x.type==="salida");
+  const systemSales=sum(s),creditSales=sum(s,"credit"),cashExpenses=sum(e),cashOut=sum(t);
+  const expected=systemSales-creditSales-cashExpenses-cashOut;
+  const close=state.closes.filter(x=>x.date===d).slice(-1)[0];
+  const real=close?Number(close.real):0;
+  const diff=real-expected;
+
+  const printWindow=window.open("","_blank","width=800,height=900");
+  if(!printWindow){
+    alert("El navegador bloqueó la ventana de impresión. Permite ventanas emergentes para Marbella Finanzas.");
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(`<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Marbella Finanzas - Cierre ${d}</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;padding:28px;color:#111}
+.sheet{max-width:760px;margin:auto}
+h1{margin:0 0 4px;font-size:26px}
+h2{margin:0 0 22px;font-size:20px}
+table{width:100%;border-collapse:collapse;font-size:16px}
+td{padding:10px 8px;border-bottom:1px solid #ddd}
+.right{text-align:right}
+.total td{font-weight:bold;font-size:21px;border-top:2px solid #111}
+.diff td{font-weight:bold;font-size:20px}
+.sign{margin-top:55px;line-height:2}
+button{margin-top:25px;padding:12px 18px;font-size:16px}
+@media print{button{display:none}}
+</style>
+</head>
+<body>
+<div class="sheet">
+<h1>MARBELLA FINANZAS</h1>
+<h2>Cierre diario — ${d}</h2>
+<table>
+<tr><td>Ventas total sistema</td><td class="right">${money(systemSales)}</td></tr>
+<tr><td>Ventas a crédito</td><td class="right">− ${money(creditSales)}</td></tr>
+<tr><td>Ventas cobradas</td><td class="right">${money(systemSales-creditSales)}</td></tr>
+<tr><td>Gastos de caja</td><td class="right">− ${money(cashExpenses)}</td></tr>
+<tr><td>Salidas de efectivo</td><td class="right">− ${money(cashOut)}</td></tr>
+<tr class="total"><td>EFECTIVO QUE DEBE HABER</td><td class="right">${money(expected)}</td></tr>
+<tr><td>Efectivo contado</td><td class="right">${money(real)}</td></tr>
+<tr class="diff"><td>DIFERENCIA</td><td class="right">${money(diff)}</td></tr>
+</table>
+<div class="sign">
+Observaciones: ________________________________________________<br><br>
+Responsable: ____________________ &nbsp;&nbsp;&nbsp; Firma: ____________________
+</div>
+<button onclick="window.print()">🖨️ Imprimir</button>
+</div>
+</body>
+</html>`);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(()=>printWindow.print(),300);
+}
+
+function printReport(){
+ const sales=sum(state.sales),creditSales=sum(state.sales,"credit"),expenses=sum(state.expenses);
+ const transfersIn=sum(state.transfers.filter(x=>x.type==="entrada")),transfersOut=sum(state.transfers.filter(x=>x.type==="salida"));
+ const orders=sum(state.orders),creditPending=sum(state.credits.map(x=>Number(x.value)-Number(x.paid||0)));
+ const expected=sales-creditSales-expenses-transfersOut;
+ $("printArea").innerHTML=`<div style="font-family:Arial,sans-serif;padding:24px;max-width:760px;margin:auto">
+ <h1 style="margin:0 0 4px">MARBELLA FINANZAS</h1>
+ <h2 style="margin:0 0 20px">Reporte completo</h2>
+ <table style="width:100%;border-collapse:collapse;font-size:16px">
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Ventas total sistema</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(sales)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Ventas a crédito</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(creditSales)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Ventas cobradas</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(sales-creditSales)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Gastos de caja</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(expenses)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Transferencias recibidas</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(transfersIn)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Salidas de efectivo</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(transfersOut)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Pedidos</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(orders)}</td></tr>
+ <tr><td style="padding:8px;border-bottom:1px solid #ddd">Crédito pendiente</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">${money(creditPending)}</td></tr>
+ <tr><td style="padding:14px 8px;font-weight:bold;font-size:20px">EFECTIVO QUE DEBE HABER</td><td style="padding:14px 8px;font-weight:bold;font-size:20px;text-align:right">${money(expected)}</td></tr>
+ </table>
+ <div style="margin-top:40px">Observaciones: ________________________________________________</div>
+ </div>`;
+ window.print();
+}
+
+function renderPersonal(){
+ const a=state.personal,inc=sum(a.filter(x=>x.type==="ingreso")),exp=sum(a.filter(x=>x.type==="gasto"));
+ $("pIncome").textContent=money(inc);$("pExpense").textContent=money(exp);$("pBalance").textContent=money(inc-exp);$("pCount").textContent=a.length;
+ $("personalList").innerHTML=a.length?[...a].reverse().map(x=>`<div class="item"><div><b>${esc(x.desc)}</b><div class="meta">${esc(x.cat)} · ${x.date}</div></div><div class="${x.type==="ingreso"?"green":"red"}"><b>${x.type==="ingreso"?"+":"-"}${money(x.amount)}</b></div></div>`).join(""):'<div class="empty">No hay movimientos personales.</div>';
+}
+$("personalForm").onsubmit=e=>{
+ e.preventDefault();
+ state.personal.push({id:Date.now().toString(36),type:$("pType").value,amount:Number($("pAmount").value),cat:$("pCat").value,desc:$("pDesc").value.trim(),date:$("pDate").value});
+ save();e.target.reset();$("pDate").value=today();renderPersonal();
+}
+function renderReportsButton(){
+}
+renderAll();renderPersonal();
+</script>
+</body>
+</html>
